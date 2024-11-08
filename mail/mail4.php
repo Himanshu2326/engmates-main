@@ -1,43 +1,69 @@
 <?php
 if(isset($_REQUEST['submit'])) 
 {
-// EDIT THE 2 LINES BELOW AS REQUIRED
-// $email_to = "engmates.tilaknagar@gmail.com, rk.abhishekbakshi@gmail.com ";
-$email_to = "himanshu.lifelinkr@gmail.com, dm.shrutisharma@gmail.com ";
+    // EDIT THE 2 LINES BELOW AS REQUIRED
+    // $email_to = "himanshu.lifelinkr@gmail.com, dm.shrutisharma@gmail.com";
+    $email_to = "engmates.tilaknagar@gmail.com, rk.abhishekbakshi@gmail.com ";
+    $email_subject = "Query from English Institute in Tilak Nagar Long LP (Top Form)";
+    
+    // validation expected data exists
+    if(!isset($_POST['name']) || !isset($_POST['phone'])) {
+        die('We are sorry, but there appears to be a problem with the form you submitted.');
+    }
 
-$email_subject = "Query from English Institute in Tilak Nagar Long LP (Top Form)";
-// validation expected data exists
-if(!isset($_POST['name']) || !isset($_POST['phone']))
-{
-die('We are sorry, but there appears to be a problem with the form you submitted.');      
-}
+    $name = $_POST['name']; // required
+    $email_from = isset($_POST['email']) ? $_POST['email'] : ''; // optional
+    $phone = $_POST['phone']; // required
+    $message = $_POST['message']; // required
+    $city = $_POST['city']; // required
 
-$name =$_POST['name']; // required
-$email_from = $_POST['email']; // optional
-$phone=$_POST['phone']; //required
-$message=$_POST['message'];//required
-$city=$_POST['city'];//required
-$ipFormInput=$_POST['ipFormInput'];
-function clean_string($string) 
-{
-$bad = array("content-type","bcc:","to:","cc:","href");
-return str_replace($bad,"",$string);
-}
+    function clean_string($string) {
+        $bad = array("content-type","bcc:","to:","cc:","href");
+        return str_replace($bad, "", $string);
+    }
 
-$ip = $_SERVER['REMOTE_ADDR'];
-@$email_message .= "Name: ".clean_string($name)."\n";
-@$email_message .= "Email: ".clean_string($email_from)."\n";
-@$email_message .= "Phone: ".clean_string($phone)."\n";
-@$email_message .= "Location: ".clean_string($city)."\n";
-@$email_message .= "Message: ".clean_string($message)."\n";
-@$email_message .= "IP: ".clean_string($ip)."\n";
-// create email headers
-$headers = "From: leads@engmates.com \r\n";
-//'Reply-To: '.$email_from."\r\n" .
-'X-Mailer: PHP/' . phpversion();
-@mail($email_to, $email_subject, $email_message, $headers); 
+    $ip = $_SERVER['REMOTE_ADDR'];
+
+    // Retrieve the full URL of the referring page
+    $full_url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'N/A';
+
+    // Extract UTM parameters from the URL
+    $utm_source = 'N/A';
+    $utm_medium = 'N/A';
+    $utm_campaign = 'N/A';
+
+    if ($full_url !== 'N/A') {
+        $url_components = parse_url($full_url);
+        
+        if (isset($url_components['query'])) {
+            parse_str($url_components['query'], $query_params);
+            $utm_source = isset($query_params['utm_source']) ? $query_params['utm_source'] : 'N/A';
+            $utm_medium = isset($query_params['utm_medium']) ? $query_params['utm_medium'] : 'N/A';
+            $utm_campaign = isset($query_params['utm_campaign']) ? $query_params['utm_campaign'] : 'N/A';
+        }
+    }
+
+    // Build the email message
+    $email_message = "Name: " . clean_string($name) . "\n";
+    $email_message .= "Email: " . clean_string($email_from) . "\n";
+    $email_message .= "Phone: " . clean_string($phone) . "\n";
+    $email_message .= "Location: " . clean_string($city) . "\n";
+    $email_message .= "Message: " . clean_string($message) . "\n";
+    $email_message .= "IP: " . clean_string($ip) . "\n";
+    $email_message .= "Full URL: " . clean_string($full_url) . "\n";
+    $email_message .= "UTM Source: " . clean_string($utm_source) . "\n";
+    $email_message .= "UTM Medium: " . clean_string($utm_medium) . "\n";
+    $email_message .= "UTM Campaign: " . clean_string($utm_campaign) . "\n";
+
+    // Create email headers
+    $headers = "From: leads@engmates.com \r\n";
+    $headers .= 'X-Mailer: PHP/' . phpversion();
+    
+    // Send the email
+    @mail($email_to, $email_subject, $email_message, $headers); 
 }
 ?>
+
 <html>
 
 <style>

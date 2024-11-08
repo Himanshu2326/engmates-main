@@ -1,31 +1,52 @@
 <?php
 if(isset($_REQUEST['submit_new'])) 
 {
-// EDIT THE 2 LINES BELOW AS REQUIRED
-// $email_to = "engmates.tilaknagar@gmail.com, rk.abhishekbakshi@gmail.com ";
-$email_to = "himanshu.lifelinkr@gmail.com, dm.shrutisharma@gmail.com ";
-$email_subject = "Query from English Institute in Tilak Nagar Long LP (Footer)";
-// validation expected data exists
-if(!isset($_POST['mbl_no']))
-{
-die('We are sorry, but there appears to be a problem with the form you submitted.');      
-}
+      // $email_to = "himanshu.lifelinkr@gmail.com, dm.shrutisharma@gmail.com";
+      $email_to = "engmates.tilaknagar@gmail.com, rk.abhishekbakshi@gmail.com ";
+    $email_subject = "Query from English Institute in Tilak Nagar Long LP (Footer)";
+    
+    if(!isset($_POST['mbl_no'])) {
+        die('We are sorry, but there appears to be a problem with the form you submitted.');
+    }
 
-$mblno =$_POST['mbl_no']; // required
-function clean_string($string) 
-{
-$bad = array("content-type","bcc:","to:","cc:","href");
-return str_replace($bad,"",$string);
-}
+    $mblno = $_POST['mbl_no']; // required
 
-$ip = $_SERVER['REMOTE_ADDR'];
-@$email_message .= "Mobile: ".clean_string($mblno)."\n";
-@$email_message .= "IP: ".clean_string($ip)."\n";
-// create email headers
-$headers = "From: leads@engmates.com \r\n";
-//'Reply-To: '.$email_from."\r\n" .
-'X-Mailer: PHP/' . phpversion();
-@mail($email_to, $email_subject, $email_message, $headers); 
+    // Retrieve the full URL of the referring page
+    $full_url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'N/A';
+
+    // Extract UTM parameters from the URL
+    $utm_source = 'N/A';
+    $utm_medium = 'N/A';
+    $utm_campaign = 'N/A';
+
+    if ($full_url !== 'N/A') {
+        $url_components = parse_url($full_url);
+        
+        if (isset($url_components['query'])) {
+            parse_str($url_components['query'], $query_params);
+            $utm_source = isset($query_params['utm_source']) ? $query_params['utm_source'] : 'N/A';
+            $utm_medium = isset($query_params['utm_medium']) ? $query_params['utm_medium'] : 'N/A';
+            $utm_campaign = isset($query_params['utm_campaign']) ? $query_params['utm_campaign'] : 'N/A';
+        }
+    }
+
+    function clean_string($string) {
+        $bad = array("content-type","bcc:","to:","cc:","href");
+        return str_replace($bad,"",$string);
+    }
+
+    $ip = $_SERVER['REMOTE_ADDR'];
+    $email_message = "Mobile: " . clean_string($mblno) . "\n";
+    $email_message .= "IP: " . clean_string($ip) . "\n";
+    $email_message .= "Full URL: " . clean_string($full_url) . "\n";
+    $email_message .= "UTM Source: " . clean_string($utm_source) . "\n";
+    $email_message .= "UTM Medium: " . clean_string($utm_medium) . "\n";
+    $email_message .= "UTM Campaign: " . clean_string($utm_campaign) . "\n";
+
+    $headers = "From: leads@engmates.com \r\n";
+    $headers .= 'X-Mailer: PHP/' . phpversion();
+    
+    @mail($email_to, $email_subject, $email_message, $headers); 
 }
 ?>
 <html>
